@@ -1,5 +1,8 @@
 package se.lexicon.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import se.lexicon.config.WalletConfig;
 import se.lexicon.dao.TransactionDao;
 import se.lexicon.dao.WalletDao;
 import se.lexicon.model.Transaction;
@@ -9,14 +12,20 @@ import se.lexicon.service.WalletService;
 
 import java.math.BigDecimal;
 
+@Component
 public class WalletServiceImpl implements WalletService {
 
     private WalletDao walletDao;
     private TransactionDao transactionDao;
 
-    public WalletServiceImpl(WalletDao walletDao, TransactionDao transactionDao) {
+    private WalletConfig walletConfig;
+
+
+    @Autowired
+    public WalletServiceImpl(WalletDao walletDao, TransactionDao transactionDao, WalletConfig walletConfig) {
         this.walletDao = walletDao;
         this.transactionDao = transactionDao;
+        this.walletConfig = walletConfig;
     }
 
     @Override
@@ -30,6 +39,9 @@ public class WalletServiceImpl implements WalletService {
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Deposit amount must be grater than zero.");
+        }
+        if (amount.compareTo(walletConfig.getMaxDeposit()) > 0) {
+            throw new IllegalArgumentException("Deposit number exceeds maximum limit of [ " + walletConfig.getMaxDeposit() + " ]");
         }
         Wallet wallet = walletDao.findById(walletId)
                 .orElseThrow(() -> new IllegalArgumentException("wallet id [" + walletId + "] not found!"));

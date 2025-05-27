@@ -1,5 +1,7 @@
 package se.lexicon;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import se.lexicon.config.AppConfig;
 import se.lexicon.dao.TransactionDao;
 import se.lexicon.dao.WalletDao;
 import se.lexicon.dao.impl.TransactionDaoImpl;
@@ -39,9 +41,11 @@ public class Main {
         Transaction createdTransaction = transactionDao.save(transaction);
 
      */
-        WalletDao walletDao = new WalletDaoImpl();
-        TransactionDao transactionDao = new TransactionDaoImpl();
-        WalletService walletService = new WalletServiceImpl(walletDao, transactionDao);
+
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        WalletService walletService = context.getBean(WalletService.class);
+
         Wallet createdWallet = walletService.create(new Wallet(new BigDecimal("500.00")));
         System.out.println("createdWallet = " + createdWallet);
         System.out.println(walletService.depositTransaction(createdWallet.getWalletId(), new BigDecimal("200.00")));
